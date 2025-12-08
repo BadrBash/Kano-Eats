@@ -7,6 +7,7 @@ export const restaurants = [
     deliveryTime: '20-30',
     cuisine: 'Local',
     featured: true,
+    category: 'popular',
   },
   {
     id: '2',
@@ -16,6 +17,7 @@ export const restaurants = [
     deliveryTime: '25-35',
     cuisine: 'Nigerian',
     featured: true,
+    category: 'popular',
   },
   {
     id: '3',
@@ -25,6 +27,7 @@ export const restaurants = [
     deliveryTime: '30-40',
     cuisine: 'Rice Dishes',
     featured: false,
+    category: 'saved',
   },
   {
     id: '4',
@@ -34,6 +37,7 @@ export const restaurants = [
     deliveryTime: '15-25',
     cuisine: 'Fast Food',
     featured: true,
+    category: 'deals',
   },
   {
     id: '5',
@@ -43,6 +47,7 @@ export const restaurants = [
     deliveryTime: '20-30',
     cuisine: 'Middle Eastern',
     featured: false,
+    category: 'nearby',
   },
   {
     id: '6',
@@ -52,6 +57,27 @@ export const restaurants = [
     deliveryTime: '25-35',
     cuisine: 'Italian',
     featured: false,
+    category: 'nearby',
+  },
+  {
+    id: '7',
+    name: 'Burger Barn',
+    image: 'https://images.pexels.com/photos/1624487/pexels-photo-1624487.jpeg?auto=compress&cs=tinysrgb&w=800',
+    rating: 4.5,
+    deliveryTime: '20-25',
+    cuisine: 'Burgers',
+    featured: false,
+    category: 'deals',
+  },
+  {
+    id: '8',
+    name: 'Noodle House',
+    image: 'https://images.pexels.com/photos/2098085/pexels-photo-2098085.jpeg?auto=compress&cs=tinysrgb&w=800',
+    rating: 4.6,
+    deliveryTime: '25-30',
+    cuisine: 'Asian',
+    featured: false,
+    category: 'nearby',
   },
 ];
 
