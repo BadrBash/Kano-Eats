@@ -1,14 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Star, Clock, MapPin, ShoppingCart } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import MenuItem from '../components/cards/MenuItem';
 import CategoryTabs from '../components/CategoryTabs';
-import { menuItems } from '../data/mockData';
+import { menuAPI } from '../services/api';
+
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+}
 
 export default function RestaurantDetails() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [cart, setCart] = useState<{ [key: string]: number }>({});
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Get restaurant ID from window state (you can also use URL params if using React Router)
+  const restaurantId = (window as any).selectedRestaurantId || '1';
+
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        setLoading(true);
+        const data = await menuAPI.getMenuItems(restaurantId);
+        setMenuItems(data || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load menu');
+        setMenuItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenuItems();
+  }, [restaurantId]);
 
   const categories = ['All', ...Array.from(new Set(menuItems.map((item) => item.category)))];
 
@@ -60,19 +92,41 @@ export default function RestaurantDetails() {
 
         <div className="grid lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3">
-            <div className="mb-6">
-              <CategoryTabs
-                categories={categories}
-                activeCategory={activeCategory}
-                onCategoryChange={setActiveCategory}
-              />
-            </div>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
 
-            <div className="space-y-4">
-              {filteredItems.map((item) => (
-                <MenuItem key={item.id} {...item} onAdd={handleAddToCart} />
-              ))}
-            </div>
+            {!loading && (
+              <>
+                <div className="mb-6">
+                  <CategoryTabs
+                    categories={categories}
+                    activeCategory={activeCategory}
+                    onCategoryChange={setActiveCategory}
+                  />
+                </div>
+
+                {loading ? (
+                  <div className="space-y-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="bg-gray-200 rounded-lg h-32 animate-pulse" />
+                    ))}
+                  </div>
+                ) : filteredItems.length > 0 ? (
+                  <div className="space-y-4">
+                    {filteredItems.map((item) => (
+                      <MenuItem key={item.id} {...item} onAdd={handleAddToCart} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500 text-lg">No menu items available</p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           <div className="lg:col-span-1">

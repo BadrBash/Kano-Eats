@@ -1,17 +1,47 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import RestaurantCard from '../components/cards/RestaurantCard';
-import { restaurants } from '../data/mockData';
+import { restaurantsAPI } from '../services/api';
+
+interface Restaurant {
+  id: string;
+  name: string;
+  image: string;
+  rating: number;
+  deliveryTime: string;
+  cuisine: string;
+}
 
 export default function Restaurants() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCuisine, setSelectedCuisine] = useState('All');
   const [selectedRating, setSelectedRating] = useState('All');
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const cuisines = ['All', 'Local', 'Nigerian', 'Fast Food', 'Rice Dishes', 'Middle Eastern', 'Italian'];
   const ratings = ['All', '4.5+', '4.0+', '3.5+'];
+
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        setLoading(true);
+        const data = await restaurantsAPI.getRestaurants();
+        setRestaurants(data || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load restaurants');
+        // Fallback to empty array
+        setRestaurants([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
 
   const filteredRestaurants = restaurants.filter((restaurant) => {
     const matchesSearch = restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -96,14 +126,34 @@ export default function Restaurants() {
           </div>
 
           <div className="lg:col-span-3">
-            <div className="mb-4 text-sm text-gray-600">
-              {filteredRestaurants.length} restaurants found
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredRestaurants.map((restaurant) => (
-                <RestaurantCard key={restaurant.id} {...restaurant} />
-              ))}
-            </div>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
+
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="bg-gray-200 rounded-xl h-64 animate-pulse" />
+                ))}
+              </div>
+            ) : filteredRestaurants.length > 0 ? (
+              <>
+                <div className="mb-4 text-sm text-gray-600">
+                  {filteredRestaurants.length} restaurants found
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredRestaurants.map((restaurant) => (
+                    <RestaurantCard key={restaurant.id} {...restaurant} />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">No restaurants found</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
